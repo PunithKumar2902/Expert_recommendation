@@ -7,18 +7,23 @@
 2.Extract 7z file using 7-zip file manager.
 
 3.Convert the xml files to csv files :
-Follow the steps in readme of :
-https://github.com/SkobelevIgor/stackexchange-xml-converter (skip the extract part as we already have done it) to convert xml files to CSV files.
 
-Copy these csv files into data folder and create a folder with your dataset name and inside that create a folder with name csv and paste User.csv and Posts.csv files.
+	Follow the steps in readme of :
 
-4.Preprocess your data using preprocess code
-Ex : python3 preprocess.py --dataset_name ask_ubuntu
+	https://github.com/SkobelevIgor/stackexchange-xml-converter (skip the extract part as we already have done it) to convert xml files to CSV files.
+
+	Copy these csv files into data folder and create a folder with your dataset name and inside that create a folder with name csv and paste User.csv and Posts.csv files.
+
+4.Preprocess your data using preprocess code :
+	
+ 	Ex : python3 preprocess.py --dataset_name ask_ubuntu
 
 You will see a result like this after successful preprocessing
+![image](https://github.com/user-attachments/assets/4bf07723-081f-426d-8eaf-e35ff8b54432)
 
 
 Then add the no of user in user_dict and no of tag combinations in tag_dict in following format
+
 NOTE: every key should be the same as the folder name in which the dataset is present.
 
 
