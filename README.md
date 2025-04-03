@@ -1,6 +1,6 @@
 # Expert_recommendation
 
-1.Download ask ubuntu dataset from :
+1.Download datasets from :
 
 	https://archive.org/download/stackexchange
 
