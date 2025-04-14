@@ -52,18 +52,7 @@ def train(model, dl, user_embeds, ques_embeds, opt):
             tot_loss+=loss
 
             loss.backward()
-
-            #remove
-
-            # # After loss.backward(), check the gradients of the layers
-            # for name, param in model.named_parameters():
-            #     if param.grad is not None:
-            #         print(f'Gradient for {name}: {param.grad.norm()}')
-            #     else:
-            #         print(f'No gradient for {name}')
-
-            #remove
-
+            
             optimizer.step()
             # scheduler.step()
 
@@ -73,17 +62,14 @@ def train(model, dl, user_embeds, ques_embeds, opt):
             file.write(f"\nEpoch {epoch+1} completed with total loss {tot_loss}\n")
             file.write(f"Epoch {epoch+1} completed with Avg loss {tot_loss/len(dl)}\n")
 
-        test(model, test_dl, user_embeds,ques_embeds)
-
 def test(model, dl, user_embeds, ques_embeds):
 
     k=5
-    #MRR, hit_K, prec_1 = 0, 0, 0
+    MRR, hit_K, prec_1 = 0, 0, 0
 
     print("===============================================================")
     print("Test ques: ",len(dl))
     print("===============================================================")
-    MRR, hit_K, prec_1, hit_3, hit_4, hit_2, hit_1 = 0, 0, 0, 0, 0, 0, 0
 
     model.eval()
     with torch.no_grad():
@@ -94,68 +80,28 @@ def test(model, dl, user_embeds, ques_embeds):
 
             if len(list(users.size()))>2:
                 users = users.squeeze(0)
+                
+            scores = model.test(users,questions)
 
-            #remove
-            # print("1 : ",users.size())
-            # print("2 : ",questions.size())
-            #remove
-
-            #uncomment
-            # scores = model.test(users,questions)
-            #uncomment
-
-            #remove
-            scores = torch.matmul(users,questions.T).squeeze()
-            #remove
-
-            #remove
-            # random_scores = torch.randn(users.size(0), 1)
-            #remove
-
-            #remove
-            # with open("outputs/test_random_scores.txt", "a") as file:
-            #     file.write(str(users.size()) +"\t\t"+str(scores.size()) + "\n")
-            # #remove
-            
             user_batch_ids = batch['UserId'].clone().detach()
             top_user_ids = batch['Top_userId'].clone().detach()
-
-            # R_R, hit, prec = performance_metrics(user_batch_ids,scores,top_user_ids,k) 
-
-            #remove
-            # punith = performance_metrics(user_batch_ids,random_scores,top_user_ids,k) 
-            # print("=====================================================================")
-            # print("hey : ",punith) 
-            # print("=====================================================================") 
-            #remove
-
-            # R_R, hit, prec = performance_metrics(user_batch_ids,random_scores,top_user_ids,k) 
+ 
             R_R, hit, prec = performance_metrics(user_batch_ids,scores,top_user_ids,k) 
 
             MRR += R_R
             hit_K += hit
             prec_1 += prec
 
-        # MRR, hit_K, prec_1 = MRR / batch_len, hit_K / test_batch_len, prec_1 / test_batch_len
-
         print("===============================================================")
         print("MRR : ",MRR)
         print("hit_K : ",hit_K)
         print("prec_1 : ",prec_1) 
-        # print("hit_1 : ",hit_1)
-        # print("hit_2 : ",hit_2)
-        # print("hit_3 : ",hit_3)
-        # print("hit_4 : ",hit_4)
         print("===============================================================")
 
         print("===============================================================")
         print("MRR : ",MRR/len(dl))
         print("hit_K : ",hit_K/len(dl))
         print("prec_1 : ",prec_1/len(dl)) 
-        # print("hit_1 : ",hit_1/len(dl))
-        # print("hit_2 : ",hit_2/len(dl))
-        # print("hit_3 : ",hit_3/len(dl))
-        # print("hit_4 : ",hit_4/len(dl))
         print("===============================================================")
 
         with open(f"outputs/{C.DATASET}_output.txt", "a") as file:
@@ -163,20 +109,12 @@ def test(model, dl, user_embeds, ques_embeds):
             file.write(f"MRR : {MRR}\n")
             file.write(f"hit_K : {hit_K}\n")
             file.write(f"prec_1 : {prec_1}\n")
-            # file.write(f"hit_1 : {hit_1}\n")
-            # file.write(f"hit_2 : {hit_2}\n")
-            # file.write(f"hit_3 : {hit_3}\n")
-            # file.write(f"hit_4 : {hit_4}\n")
             file.write("===============================================================\n")
 
             file.write("===============================================================\n")
             file.write(f"MRR : {MRR/len(dl)}\n")
             file.write(f"hit_K : {hit_K/len(dl)}\n")
             file.write(f"prec_1 : {prec_1/len(dl)}\n")
-            # file.write(f"hit_1 : {hit_1/len(dl)}\n")
-            # file.write(f"hit_2 : {hit_2/len(dl)}\n")
-            # file.write(f"hit_3 : {hit_3/len(dl)}\n")
-            # file.write(f"hit_4 : {hit_4/len(dl)}\n")
             file.write("===============================================================\n")
 
 
@@ -189,14 +127,8 @@ if __name__ == '__main__':
     opt.epoch = 5
     opt.n_layers = 1  
 
-    #uncomment
-    # opt.batch_size = 32 
-    #uncomment
-
-    #delete
     opt.batch_size = 8
-    #delete
-
+    
     opt.dropout = 0.6
     opt.smooth = 0.06
     opt.n_head = 1
@@ -237,6 +169,6 @@ if __name__ == '__main__':
 
     model = model.to(opt.device)
 
-    # train(model, train_dl, user_embeds, ques_embeds,opt)
+    train(model, train_dl, user_embeds, ques_embeds,opt)
 
     test(model, test_dl, user_embeds,ques_embeds)

@@ -1,3 +1,4 @@
+import sys
 import torch
 import pandas as pd
 import Constants as C
@@ -46,8 +47,6 @@ def calculate_embeds(opt,embed_path):
     final_embeds = torch.cat(user_embeds,dim=0)
     final_q_embeds = model.state_dict()['event_emb.weight']
     
-    # final_q_embeds = final_q_embeds[1:]
-
     torch.save(final_embeds,embed_path+'_user_embeds.pt')
     torch.save(final_q_embeds,embed_path+'_ques_embeds.pt')
 
@@ -58,17 +57,16 @@ def calculate_embeds(opt,embed_path):
     print("============================================================")
 
 
-def give_data(data_path):
+def give_data(data_path,min_users=3):
     
     df = pd.read_csv(f'{data_path}/answers_data.csv',header=None,names=['UserId','Qtag_Id','Timestamp','Top_userId','QId'])
 
-    # print(df.head())
-    # print(df['QId'].value_counts().iloc[:23000])
+    df = df.drop(columns=['Timestamp'])
 
     df['Qtag_Id'] = df['Qtag_Id']+1
 
     ques_counts = df['QId'].value_counts()
-    ques_to_keep = ques_counts[ques_counts>1].index
+    ques_to_keep = ques_counts[ques_counts>=min_users].index
 
     df = df.loc[df['QId'].isin(ques_to_keep)]
 
@@ -163,18 +161,8 @@ def performance_metrics(aid_list, score_list, accid, k):
         if(aid_list.size()[1]==1):
             return int(aid_list[0] == accid), 1, 1
 
-        # print("========================================================================================")
-        # print("aid list 0: ",aid_list.size())
-        # print("score list 0: ",score_list.size())
-        # print("========================================================================================")
-
         aid_list = aid_list.squeeze()
         score_list = score_list.squeeze()
-
-        # print("========================================================================================")
-        # print("aid list : 1",aid_list.size())
-        # print("score list 1: ",score_list.size())
-        # print("========================================================================================")
 
         if len(aid_list) != len(score_list):
             print("aid_list and score_list not equal length.",

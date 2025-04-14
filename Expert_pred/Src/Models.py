@@ -106,7 +106,6 @@ class Ranking_model(nn.Module):
             high_score = self.fc_new_3(self.fc_new_2(self.fc_new_1(high_score).squeeze()))
 
             cur_loss = torch.sum(torch.sigmoid(low_score - high_score))
-            # cur_loss = torch.sum(low_score - high_score)
 
             tot_loss+=cur_loss
 
