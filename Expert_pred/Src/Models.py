@@ -79,13 +79,11 @@ class Ranking_model(nn.Module):
             cur_user = cur_user[:cnt]
             cur_top_user =  cur_top_user.repeat(cnt,1)
             cur_ques =  cur_ques.repeat(cnt,1)
-                    
+            
+            #unsqueezing for channels dimension
             low_rank_mat = torch.stack((cur_user,cur_ques),dim=1).unsqueeze(1)
 
             high_rank_mat = torch.stack((cur_top_user,cur_ques),dim=1).unsqueeze(1)
-
-            low_rank_mat1 = self.convnet1(low_rank_mat)
-            low_rank_mat2 = self.convnet2(low_rank_mat)
 
             low_score = torch.cat([
                 self.convnet1(low_rank_mat)

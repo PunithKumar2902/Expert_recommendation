@@ -40,12 +40,6 @@ def train(model, dl, user_embeds, ques_embeds, opt):
 
             optimizer.zero_grad()
             users, top_users, questions = get_embeddings(batch, user_embeds, ques_embeds)
-
-            # print("===================epoch=======================")
-            # print("user ids ", users.device)
-            # print("top user ids ", top_users.size())
-            # print("ques tag ids ", questions.size())
-            # print("==========================================")
             
             loss = model(users, top_users, questions,batch['UserId'])
 

@@ -59,12 +59,14 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Pass dataset name")
     parser.add_argument("--dataset_name", required=True, help="name of dataset")
+    parser.add_argument("--min_answers", required=True, type=int, help="minimum no of questions to be answered by an expert")
 
     # Parse the arguments
     args = parser.parse_args()
 
     # Access the arguments
     dataset_name = args.dataset_name
+    min_answers = args.min_answers
 
     user_file_path = f'data/{dataset_name}/csv/Users.csv'
     posts_file_path = f'data/{dataset_name}/csv/Posts.csv'
@@ -186,7 +188,7 @@ if __name__ == "__main__":
 
         user_counts = data['UserId'].value_counts()
 
-        users_to_keep = user_counts[user_counts>6].index
+        users_to_keep = user_counts[user_counts>min_answers].index
 
         df = data.loc[data['UserId'].isin(users_to_keep)]
         df = df.loc[df['Top_user'].isin(users_to_keep)]
