@@ -15,7 +15,7 @@ def get_user_id(post_id):
         print(post_id)
     return x
 
-# Function to split the data
+# Function to split the data.
 def split_user_data(df, test_size=0.2, val_size=0.1):
     train_list = []
     val_list = []
