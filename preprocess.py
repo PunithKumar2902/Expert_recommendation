@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 
 import argparse
 
-# Function for getting accepted answerer ID
+# Function for getting answerer ID (this is later used to get user id of accepted answerers)
 def get_user_id(post_id):
     
     try:
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
             #Append the dictionary to the list
             #print(row_dict)
-            #break 
+            #break  
             data.append(row_dict)        
 
         print("Creating dataframe...\n")
@@ -179,25 +179,30 @@ if __name__ == "__main__":
 
         data = pd.read_csv(f'{dataset_path}/temporary_data.csv')
 
+        # #comment
+        # print("========================================================================")
+        # print("Number of users in dataset : ", data['UserId'].nunique())
+        # print("Number of experts in dataset : ", data['Top_user'].nunique())
+        # print("Number of Questions : ",data['QId'].nunique())
+        # print("Number of Question tags : ",data['Qtag'].nunique())
+        # print("========================================================================")
+        # #comment
+
         #If a user has not given any accepted answer, that user shouldnt be considered as expert as of now
 
         valid_users = list(set(list(data['Top_user'])))
         data = data.loc[data['UserId'].isin(valid_users)]
 
-        #uncomment
         user_counts = data['UserId'].value_counts()
 
-        users_to_keep = user_counts[user_counts>6].index
+        users_to_keep = user_counts[user_counts>4].index
 
         df = data.loc[data['UserId'].isin(users_to_keep)]
         df = df.loc[df['Top_user'].isin(users_to_keep)]
-        #uncomment
 
         le = LabelEncoder()
         le1 = LabelEncoder()
         le2 = LabelEncoder()
-
-        # df = data
 
         df['UserId'] = le.fit_transform(df['UserId'])
         df['Top_user'] = le.transform(df['Top_user'])
