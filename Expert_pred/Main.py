@@ -151,7 +151,8 @@ if __name__ == '__main__':
     print("\nEmbeddings loaded succesfully .....")
     print("============================================================")
 
-    train_data, test_data = give_data(data_path)
+    # train_data, test_data = give_data(data_path)
+    train_data, test_data = give_data(data_path,2)
 
     train_data = RankingDataset(train_data)
     test_data = RankingDataset(test_data)
