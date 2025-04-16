@@ -17,7 +17,7 @@ Copy these csv files into data folder and create a folder with your dataset name
 
 4.Preprocess your data using preprocess code :
 	
- 	Ex : python3 preprocess.py --dataset_name ask_ubuntu
+ 	Ex : python3 preprocess.py --dataset_name ask_ubuntu --min_answers=3
 
 You will see a result like this after successful preprocessing
 ![image](https://github.com/user-attachments/assets/4bf07723-081f-426d-8eaf-e35ff8b54432)
