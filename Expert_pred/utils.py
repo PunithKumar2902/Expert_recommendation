@@ -72,8 +72,6 @@ def give_data(data_path,min_users=3):
 
     print(f"\n{len(ques_to_keep)} valid questions were found")
 
-    #for this data i found that 23000 questions have atleast 2 users answered them
-
     data = df.groupby('QId').agg({
         'UserId': list,  # Collect answerer ids into a list
         'Top_userId': 'first',  # Top user is the same for all rows with the same question_id
@@ -96,7 +94,7 @@ def give_data(data_path,min_users=3):
     #Remove
     temp =  data['UserId'].apply(len)
 
-    train, test = train_test_split(data,test_size = 0.2)
+    train, test = train_test_split(data,test_size = 0.2,random_state=32)
 
     print("\n====================================================================================")
     
