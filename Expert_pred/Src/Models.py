@@ -59,7 +59,7 @@ class Ranking_model(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def forward(self, users, top_user, question, uids):
+    def forward(self, users, top_user, question, uids, neg_users):
 
         B, U, D = users.size()
 
@@ -97,7 +97,20 @@ class Ranking_model(nn.Module):
         # print("valid ",valid_mask.size())
         pairwise_loss = torch.sigmoid(pairwise_diff.masked_select(valid_mask)).sum()
 
-        total_loss = pairwise_loss 
+        q_neg_exp = question.unsqueeze(1).expand(-1, neg_users.size(1), -1)  # [B, 10, D]
+        neg_rank_mat = torch.stack((neg_users, q_neg_exp), dim=2).unsqueeze(2)  # [B, 10, 1, 2, D]
+        neg_rank_mat = neg_rank_mat.view(-1, 1, 2, D)  # [B*10, 1, 2, D]
+
+        neg_scores = get_score(neg_rank_mat).view(B,10)
+
+        # === 5. Contrastive Loss Term ===
+        # valid_mask = valid_mask.view(-1)
+        min_low_score = low_scores.masked_fill(~valid_mask, float('inf')).min(dim=1).values  # [B]
+        max_neg_score = neg_scores.max(dim=1).values  # [B]
+
+        contrastive_loss = torch.nn.functional.relu(max_neg_score - min_low_score).sum()
+
+        total_loss = pairwise_loss + contrastive_loss
 
         return total_loss
     

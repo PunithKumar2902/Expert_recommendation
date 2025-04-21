@@ -156,11 +156,11 @@ def performance_metrics(aid_list, score_list, accid, k):
             k  -  precision at K
         """
 
-        if(aid_list.size()[1]==1):
-            return int(aid_list[0] == accid), 1, 1
+        # if(aid_list.size()[1]==1):
+        #     return int(aid_list[0] == accid), 1, 1
 
-        aid_list = aid_list.squeeze()
-        score_list = score_list.squeeze()
+        # aid_list = aid_list.squeeze()
+        # score_list = score_list.squeeze()
 
         if len(aid_list) != len(score_list):
             print("aid_list and score_list not equal length.",
@@ -177,7 +177,44 @@ def performance_metrics(aid_list, score_list, accid, k):
                 else:
                     return 1/(ind+1), int(ind < k), 0
 
-            
+
+def sample_negative_users(all_users, uids, num_negatives=10):
+    """
+    GPU-accelerated sampling of negative users for each batch sample.
+
+    Args:
+        all_user_embeddings: [N, D] tensor of all user embeddings
+        uids: [B, U] tensor of user IDs used in the batch (0 = padding)
+        num_negatives: int, number of negative samples per sample
+
+    Returns:
+        [B, num_negatives, D] tensor of negative user embeddings
+    """
+    device = uids.device
+    batch_dim, max_users = uids.shape
+    N = all_users.shape[0]  # total users
+
+    # 1. Create binary mask of shape [B, N], where True = valid candidate for negative
+    mask = torch.ones(batch_dim, N, dtype=torch.bool, device=device)  # assume all valid
+
+    # For each sample, mask out the user IDs in that sample
+    mask.scatter_(1, uids, False)
+
+    # Ensure we don't sample padding (0 ID)
+    mask[:, 0] = False
+
+    # 2. Get probabilities (uniform over valid IDs)
+    probs = mask.float()
+    probs = probs / probs.sum(dim=1, keepdim=True)  # normalize
+
+    # 3. Sample indices from the distribution [B, num_negatives]
+    sampled_indices = torch.multinomial(probs, num_negatives, replacement=False)  # [B, num_negatives]
+
+    # 4. Gather embeddings
+    neg_users = all_users[sampled_indices]  # [B, num_negatives, D]
+
+    return neg_users,sampled_indices
+         
 
 if __name__ == "__main__":
     data_path=f'/u/student/2023/cs23mtech11032/Punith/Expert_recommendation/user_pre_training/data/{C.DATASET}'

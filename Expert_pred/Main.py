@@ -40,8 +40,9 @@ def train(model, dl, user_embeds, ques_embeds, opt):
 
             optimizer.zero_grad()
             users, top_users, questions = get_embeddings(batch, user_embeds, ques_embeds)
-            
-            loss = model(users, top_users, questions,batch['UserId'])
+            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'])
+
+            loss = model(users, top_users, questions,batch['UserId'], neg_samples)
 
             tot_loss+=loss
 
@@ -74,12 +75,22 @@ def test(model, dl, user_embeds, ques_embeds):
 
             if len(list(users.size()))>2:
                 users = users.squeeze(0)
-                
+            
+            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'])
+
+            neg_samples = neg_samples.squeeze(0)
+
+            users = torch.cat([users,neg_samples],dim=0)
+
             scores = model.test(users,questions)
 
-            user_batch_ids = batch['UserId'].clone().detach()
+            user_batch_ids = batch['UserId'].clone().detach().view(-1)
+            neg_indices = neg_indices.view(-1)
+
+            user_batch_ids = torch.cat([user_batch_ids,neg_indices],dim =0)
+
             top_user_ids = batch['Top_userId'].clone().detach()
- 
+
             R_R, hit, prec = performance_metrics(user_batch_ids,scores,top_user_ids,k) 
 
             MRR += R_R
@@ -152,7 +163,7 @@ if __name__ == '__main__':
     print("============================================================")
 
     # train_data, test_data = give_data(data_path)
-    train_data, test_data = give_data(data_path,2)
+    train_data, test_data = give_data(data_path,3)
 
     train_data = RankingDataset(train_data)
     test_data = RankingDataset(test_data)
