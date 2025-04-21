@@ -61,53 +61,45 @@ class Ranking_model(nn.Module):
 
     def forward(self, users, top_user, question, uids):
 
-        tot_loss =0 
-        for id in range(users.size()[0]):
-            
-            cur_user = users[id]
-            cur_top_user =  top_user[id]
-            cur_ques =  question[id]
-            
-            cur_ids = uids[id] 
+        B, U, D = users.size()
 
-            cnt =0 
-            for u in cur_ids:
-                if u.item()==0:
-                    break
-                cnt+=1
+        # Expand top_user and question to match shape
+        top_user_expanded = top_user.unsqueeze(1).expand(-1, U, -1)  # [B, U, D]
+        question_expanded = question.unsqueeze(1).expand(-1, U, -1)  # [B, U, D]
 
-            cur_user = cur_user[:cnt]
-            cur_top_user =  cur_top_user.repeat(cnt,1)
-            cur_ques =  cur_ques.repeat(cnt,1)
-            
-            #unsqueezing for channels dimension
-            low_rank_mat = torch.stack((cur_user,cur_ques),dim=1).unsqueeze(1)
+        # Create user-question pairs
+        low_rank_mat = torch.stack((users, question_expanded), dim=2).unsqueeze(2)  # [B, U, 1, 2, D]
+        high_rank_mat = torch.stack((top_user_expanded, question_expanded), dim=2).unsqueeze(2)  # [B, U, 1, 2, D]
 
-            high_rank_mat = torch.stack((cur_top_user,cur_ques),dim=1).unsqueeze(1)
+        # Reshape for CNN: merge batch and user dimensions
+        low_rank_mat = low_rank_mat.view(-1, 1, 2, D)    # [(B*U), 1, 2, D]
+        high_rank_mat = high_rank_mat.view(-1, 1, 2, D)  # [(B*U), 1, 2, D]
 
-            low_score = torch.cat([
-                self.convnet1(low_rank_mat)
-                , self.convnet2(low_rank_mat)]
-                , dim=2)
+        # Conv layers
+        def get_score(mat):
+            x = torch.cat([self.convnet1(mat), self.convnet2(mat)], dim=2)
+            x = self.convnet3(x)
+            x = x.squeeze()  # [(B*U), T]
+            x = self.fc_new_3(self.fc_new_2(self.fc_new_1(x)))
+            return x.squeeze()  # [(B*U)]
 
-            low_score = self.convnet3(low_score)
-            
-            low_score = self.fc_new_3(self.fc_new_2(self.fc_new_1(low_score).squeeze()))
- 
-            high_score = torch.cat([
-                self.convnet1(high_rank_mat)
-                , self.convnet2(high_rank_mat)]
-                , dim=2)
+        low_scores = get_score(low_rank_mat).view(B,U)
+        high_scores = get_score(high_rank_mat).view(B,U)
 
-            high_score = self.convnet3(high_score)
+        # Mask out padding
+        valid_mask = (uids != 0)  # [B*U], True for valid users
+        valid_mask = valid_mask.to(low_scores.device)
 
-            high_score = self.fc_new_3(self.fc_new_2(self.fc_new_1(high_score).squeeze()))
+        # Compute loss only for valid users
+        pairwise_diff = low_scores-high_scores
 
-            cur_loss = torch.sum(torch.sigmoid(low_score - high_score))
+        # print("pairwise :",pairwise_diff.size())
+        # print("valid ",valid_mask.size())
+        pairwise_loss = torch.sigmoid(pairwise_diff.masked_select(valid_mask)).sum()
 
-            tot_loss+=cur_loss
+        total_loss = pairwise_loss 
 
-        return tot_loss
+        return total_loss
     
     def test(self,users, question):
         
