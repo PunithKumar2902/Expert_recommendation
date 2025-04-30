@@ -41,7 +41,7 @@ class Dataset(object):
         user_data, user_valid = [], []
 
         for i in range(self.user_num):
-            user_data.append((self.training_user[i], self.tuning_times[i], self.tuning_user[i], ), )
+            user_data.append((self.training_user[i], self.training_times[i], self.tuning_user[i], ), )
             
             valid_input = self.training_user[i].copy()
             valid_input.extend(self.tuning_user[i])

@@ -58,11 +58,11 @@ def read_interaction(train_data=None, directory_path=None):
 
     print(interaction_matrix.size())
     for eachline in train_data:
+
         uid, lid, timestamp = eachline.strip().split()
-        # for some datasets, the POI ID starts from 1, so whether to add -1 depends on the datasets
-        # uid, lid, timestamp = int(uid), int(lid), int(timestamp) -m
-        uid, lid, timestamp = int(uid), int(lid) - 1, int(timestamp)
-        # print(uid, lid)
+
+        uid, lid, timestamp = int(uid), int(lid), int(timestamp)
+
         interaction_matrix[uid][lid] = 1
         count += 1
         if count % 500000 == 0:
