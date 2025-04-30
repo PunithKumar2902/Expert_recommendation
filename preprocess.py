@@ -68,7 +68,6 @@ if __name__ == "__main__":
     dataset_name = args.dataset_name
     min_answers = args.min_answers
 
-    user_file_path = f'data/{dataset_name}/csv/Users.csv'
     posts_file_path = f'data/{dataset_name}/csv/Posts.csv'
     data_path = f'data/{dataset_name}/csv'
 
