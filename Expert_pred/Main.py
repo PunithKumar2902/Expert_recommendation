@@ -163,7 +163,7 @@ if __name__ == '__main__':
     print("============================================================")
 
     # train_data, test_data = give_data(data_path)
-    train_data, test_data = give_data(data_path,3)
+    train_data, test_data = give_data(data_path,1)
 
     train_data = RankingDataset(train_data)
     test_data = RankingDataset(test_data)

@@ -95,7 +95,7 @@ class Ranking_model(nn.Module):
 
         # print("pairwise :",pairwise_diff.size())
         # print("valid ",valid_mask.size())
-        pairwise_loss = torch.sigmoid(pairwise_diff.masked_select(valid_mask)).sum()
+        pairwise_loss = torch.sigmoid(pairwise_diff.masked_select(valid_mask)).mean()
 
         q_neg_exp = question.unsqueeze(1).expand(-1, neg_users.size(1), -1)  # [B, 10, D]
         neg_rank_mat = torch.stack((neg_users, q_neg_exp), dim=2).unsqueeze(2)  # [B, 10, 1, 2, D]
@@ -108,7 +108,7 @@ class Ranking_model(nn.Module):
         min_low_score = low_scores.masked_fill(~valid_mask, float('inf')).min(dim=1).values  # [B]
         max_neg_score = neg_scores.max(dim=1).values  # [B]
 
-        contrastive_loss = torch.nn.functional.relu(max_neg_score - min_low_score).sum()
+        contrastive_loss = torch.nn.functional.relu(max_neg_score - min_low_score).mean()
 
         total_loss = pairwise_loss + contrastive_loss
 
