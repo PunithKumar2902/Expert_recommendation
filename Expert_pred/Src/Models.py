@@ -40,9 +40,11 @@ class Ranking_model(nn.Module):
             ('relu3', nn.ReLU())
         ]))
 
-        self.fc_new_1 = nn.Linear(self.kernel_2-1, self.kernel_2//4)
-        self.fc_new_2 = nn.Linear(self.kernel_2//4, 16)
-        self.fc_new_3 = nn.Linear(16, 1)
+        self.features_for_NN = self.conv_features_size - self.kernel_2+1
+
+        self.fc_new_1 = nn.Linear(self.features_for_NN, self.features_for_NN//2)
+        self.fc_new_2 = nn.Linear(self.features_for_NN//2, 4)
+        self.fc_new_3 = nn.Linear(4, 1)
 
         self._initialize_weights()
 
@@ -95,13 +97,13 @@ class Ranking_model(nn.Module):
 
         # print("pairwise :",pairwise_diff.size())
         # print("valid ",valid_mask.size())
-        pairwise_loss = torch.sigmoid(pairwise_diff.masked_select(valid_mask)).mean()
+        pairwise_loss = torch.relu(pairwise_diff.masked_select(valid_mask)).mean()
 
         q_neg_exp = question.unsqueeze(1).expand(-1, neg_users.size(1), -1)  # [B, 10, D]
         neg_rank_mat = torch.stack((neg_users, q_neg_exp), dim=2).unsqueeze(2)  # [B, 10, 1, 2, D]
         neg_rank_mat = neg_rank_mat.view(-1, 1, 2, D)  # [B*10, 1, 2, D]
 
-        neg_scores = get_score(neg_rank_mat).view(B,10)
+        neg_scores = get_score(neg_rank_mat).view(B,neg_users.size()[1])
 
         # === 5. Contrastive Loss Term ===
         # valid_mask = valid_mask.view(-1)

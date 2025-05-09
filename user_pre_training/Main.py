@@ -151,7 +151,7 @@ def main():
     opt.n_layers = 1
     opt.n_head = 1
     opt.d_model = C.EMB_size #128 #1024 #448
-    opt.epoch = 20
+    opt.epoch = 8
     opt.batch_size = 8
 
     opt.dropout = 0.62

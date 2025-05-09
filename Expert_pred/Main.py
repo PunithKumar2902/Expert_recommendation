@@ -40,14 +40,14 @@ def train(model, dl, user_embeds, ques_embeds, opt):
 
             optimizer.zero_grad()
             users, top_users, questions = get_embeddings(batch, user_embeds, ques_embeds)
-            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'])
+            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'],50)
 
             loss = model(users, top_users, questions,batch['UserId'], neg_samples)
 
             tot_loss+=loss
 
             loss.backward()
-            
+
             optimizer.step()
             # scheduler.step()
 
@@ -76,7 +76,7 @@ def test(model, dl, user_embeds, ques_embeds):
             if len(list(users.size()))>2:
                 users = users.squeeze(0)
             
-            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'])
+            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'],50)
 
             neg_samples = neg_samples.squeeze(0)
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     opt.lr = 0.0001
 
     embed_path = f"results/{C.DATASET}/{C.DATASET}"
-    data_path=f'/u/student/2023/cs23mtech11032/Punith/Expert_recommendation/user_pre_training/data/{C.DATASET}'
+    data_path=f'user_pre_training/data/{C.DATASET}'
 
     if not (os.path.exists(embed_path+'_user_embeds.pt') and os.path.exists(embed_path+'_ques_embeds.pt')):
 
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     print("============================================================")
 
     # train_data, test_data = give_data(data_path)
-    train_data, test_data = give_data(data_path,1)
+    train_data, test_data = give_data(data_path,5)
 
     train_data = RankingDataset(train_data)
     test_data = RankingDataset(test_data)
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     train_dl = DataLoader(train_data, batch_size=8, shuffle=True,collate_fn = collate_fn)
     test_dl = DataLoader(test_data, batch_size=1, shuffle=True)
 
-    model = Ranking_model(opt.d_model,opt.d_model//512+1,1)
+    model = Ranking_model(opt.d_model,33,1)
 
     model = model.to(opt.device)
 
