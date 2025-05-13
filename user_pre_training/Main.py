@@ -1,12 +1,12 @@
 import os
 import sys
 import time
-import optuna
+# import optuna
 import argparse
 import numpy as np
 import Constants as C
 
-from optuna.trial import TrialState
+# from optuna.trial import TrialState
 
 from src.Models import Model
 from preprocess.Dataset import Dataset as dataset
