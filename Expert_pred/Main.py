@@ -11,6 +11,20 @@ from utils import *
 from torch.utils.data import DataLoader
 from Src.Models import Ranking_model
 
+import random
+import numpy as np
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # For multi-GPU setups
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False  # Disable CuDNN optimizations for reproducibility
+
+
+
 def collate_fn(batch):
 
     user_tensors = [data['UserId'].clone().detach() for data in batch]
@@ -76,18 +90,18 @@ def test(model, dl, user_embeds, ques_embeds):
             if len(list(users.size()))>2:
                 users = users.squeeze(0)
             
-            neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'],50)
+            # neg_samples,neg_indices = sample_negative_users(user_embeds, batch['UserId'],50)
 
-            neg_samples = neg_samples.squeeze(0)
+            # neg_samples = neg_samples.squeeze(0)
 
-            users = torch.cat([users,neg_samples],dim=0)
+            # users = torch.cat([users,neg_samples],dim=0)
 
             scores = model.test(users,questions)
 
             user_batch_ids = batch['UserId'].clone().detach().view(-1)
-            neg_indices = neg_indices.view(-1)
+            # neg_indices = neg_indices.view(-1)
 
-            user_batch_ids = torch.cat([user_batch_ids,neg_indices],dim =0)
+            # user_batch_ids = torch.cat([user_batch_ids,neg_indices],dim =0)
 
             top_user_ids = batch['Top_userId'].clone().detach()
 
@@ -124,7 +138,7 @@ def test(model, dl, user_embeds, ques_embeds):
 
 
 if __name__ == '__main__':
-    
+    set_seed(42)  
     parser = argparse.ArgumentParser()
     opt = parser.parse_args()
     opt.device = torch.device('cuda')
@@ -163,13 +177,15 @@ if __name__ == '__main__':
     print("============================================================")
 
     # train_data, test_data = give_data(data_path)
-    train_data, test_data = give_data(data_path,5)
+    train_data, test_data = give_data(data_path,1)
 
     train_data = RankingDataset(train_data)
     test_data = RankingDataset(test_data)
 
-    train_dl = DataLoader(train_data, batch_size=8, shuffle=True,collate_fn = collate_fn)
-    test_dl = DataLoader(test_data, batch_size=1, shuffle=True)
+    # train_dl = DataLoader(train_data, batch_size=8, shuffle=True,collate_fn = collate_fn)
+    train_dl = DataLoader(train_data, batch_size=8, shuffle=False, collate_fn = collate_fn)
+    # test_dl = DataLoader(test_data, batch_size=1, shuffle=True)
+    test_dl = DataLoader(test_data, batch_size=1, shuffle=False)
 
     model = Ranking_model(opt.d_model,33,1)
 

@@ -99,22 +99,23 @@ class Ranking_model(nn.Module):
         # print("valid ",valid_mask.size())
         pairwise_loss = torch.relu(pairwise_diff.masked_select(valid_mask)).mean()
 
-        q_neg_exp = question.unsqueeze(1).expand(-1, neg_users.size(1), -1)  # [B, 10, D]
-        neg_rank_mat = torch.stack((neg_users, q_neg_exp), dim=2).unsqueeze(2)  # [B, 10, 1, 2, D]
-        neg_rank_mat = neg_rank_mat.view(-1, 1, 2, D)  # [B*10, 1, 2, D]
+        # q_neg_exp = question.unsqueeze(1).expand(-1, neg_users.size(1), -1)  # [B, 10, D]
+        # neg_rank_mat = torch.stack((neg_users, q_neg_exp), dim=2).unsqueeze(2)  # [B, 10, 1, 2, D]
+        # neg_rank_mat = neg_rank_mat.view(-1, 1, 2, D)  # [B*10, 1, 2, D]
 
-        neg_scores = get_score(neg_rank_mat).view(B,neg_users.size()[1])
+        # neg_scores = get_score(neg_rank_mat).view(B,neg_users.size()[1])
 
         # === 5. Contrastive Loss Term ===
         # valid_mask = valid_mask.view(-1)
-        min_low_score = low_scores.masked_fill(~valid_mask, float('inf')).min(dim=1).values  # [B]
-        max_neg_score = neg_scores.max(dim=1).values  # [B]
+        # min_low_score = low_scores.masked_fill(~valid_mask, float('inf')).min(dim=1).values  # [B]
+        # max_neg_score = neg_scores.max(dim=1).values  # [B]
 
-        contrastive_loss = torch.nn.functional.relu(max_neg_score - min_low_score).mean()
+        # contrastive_loss = torch.nn.functional.relu(max_neg_score - min_low_score).mean()
 
-        total_loss = pairwise_loss + contrastive_loss
+        # total_loss = pairwise_loss + contrastive_loss
 
-        return total_loss
+        return pairwise_loss
+        # return total_loss
     
     def test(self,users, question):
         

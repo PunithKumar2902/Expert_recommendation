@@ -1,7 +1,7 @@
 DATASET = 'ask_ubuntu'
 
 user_dict = {
-    'ask_ubuntu': 1096,
+    'ask_ubuntu': 35038,
     'math' : 11762,
     # 'math' : 12546,
     'android' : 385,
@@ -9,7 +9,7 @@ user_dict = {
 }
 
 tag_dict = {
-    'ask_ubuntu': 49492,
+    'ask_ubuntu': 84293,
     'math' : 191503,
     # 'math' : 24824,
     'android' : 7710,
