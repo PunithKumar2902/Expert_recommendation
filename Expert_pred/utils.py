@@ -98,7 +98,8 @@ def give_data(data_path,min_users=3):
 
     print("\n====================================================================================")
     
-    print("Maximum length of 'UserId' list:", temp.max())
+    print("No of users : ", df['UserId'].nunique())
+    print("No of questions : ", df['QId'].nunique())
 
     print(f"No of questions in train : {len(train)}")
     print(f"No of questions in test : {len(test)}\n")

@@ -187,7 +187,7 @@ if __name__ == '__main__':
     # test_dl = DataLoader(test_data, batch_size=1, shuffle=True)
     test_dl = DataLoader(test_data, batch_size=1, shuffle=False)
 
-    model = Ranking_model(opt.d_model,33,1)
+    model = Ranking_model(opt.d_model,C.KNL_size,1)
 
     model = model.to(opt.device)
 

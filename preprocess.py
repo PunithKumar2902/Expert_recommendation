@@ -228,6 +228,8 @@ if __name__ == "__main__":
         print("No. of. Users",df['UserId'].max()+1)
         print()
         print("No. of. Tag combinations",df['Qtag'].max()+1)
+        print()
+        print("No of Questions : ",df['QId'].nunique())
         print("=======================================================================================")
 
         print("Preprocessing completed and all necessary files are created\n")

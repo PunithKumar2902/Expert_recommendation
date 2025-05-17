@@ -105,8 +105,14 @@ class Ranking_model(nn.Module):
 
         # neg_scores = get_score(neg_rank_mat).view(B,neg_users.size()[1])
 
-        # === 5. Contrastive Loss Term ===
-        # valid_mask = valid_mask.view(-1)
+        ## === 5. Contrastive Loss Term ===
+        ## valid_mask = valid_mask.view(-1)
+
+        # print("=================================================================")
+        # print("low score : ",low_scores.size())
+        # print("valid mask : ",valid_mask.size())
+        # print("=================================================================")
+
         # min_low_score = low_scores.masked_fill(~valid_mask, float('inf')).min(dim=1).values  # [B]
         # max_neg_score = neg_scores.max(dim=1).values  # [B]
 
