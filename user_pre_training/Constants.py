@@ -8,7 +8,7 @@ user_dict = {
 }
 
 tag_dict = {
-    'ask_ubuntu': 84293,
+    'ask_ubuntu': 84293, #131012 ques
     'math' : 196036,
     'android' : 12357, #16191 ques 
     'biology' : 7608 #11750 ques
