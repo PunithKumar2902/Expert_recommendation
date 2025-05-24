@@ -18,6 +18,19 @@ from src import metric, Utils
 
 from tqdm import tqdm
 
+import random
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if using multi-GPU
+
+    # Ensure deterministic behavior
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
 def train_epoch(model, user_dl, optimizer, opt):
     """ Epoch operation in training phase. """
 
@@ -133,7 +146,8 @@ def main():
     parser = argparse.ArgumentParser()
     opt = parser.parse_args()
     opt.device = torch.device('cuda')
-
+    set_seed(seed=42)
+    
     # >> optuna setting for tuning hyperparameters
     # opt.n_layers = trial.suggest_int('n_layers', 1,5, )
     # opt.n_head = trial.suggest_int('n_head', 1, 5, step=1)

@@ -93,7 +93,7 @@ class Dataset(object):
             num_workers=0,
             batch_size=batch_size,
             collate_fn=self.user_fn,
-            shuffle=True
+            shuffle=False
         )
         return user_dl
 
@@ -103,7 +103,7 @@ class Dataset(object):
             num_workers=0,
             batch_size=batch_size,
             collate_fn=self.user_fn,
-            shuffle=True
+            shuffle=False
         )
         return user_valid_dl
 

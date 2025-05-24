@@ -195,17 +195,53 @@ if __name__ == "__main__":
         le = LabelEncoder()
         le1 = LabelEncoder()
         le2 = LabelEncoder()
-
-        df['UserId'] = le.fit_transform(df['UserId'])
-        df['Top_user'] = le.transform(df['Top_user'])
-        df['Qtag'] = le1.fit_transform(df['Qtag'])
+        
         df['QId'] = le2.fit_transform(df['QId'])
-
-        df.to_csv(f'{dataset_path}/answers_data.csv',header = False,index=False)
-
+        
         print("Performing train test split...\n")
         # Splitting the DataFrame
-        train_data, tuning_data, test_data = split_user_data(df)
+
+        df['AnsweredDate'] = pd.to_datetime(df['AnsweredDate'])
+
+        # Sort by AnsweredDate to get temporal order
+        question_order = df.groupby('QId')['AnsweredDate'].min().sort_values().index.tolist()
+
+        # Total number of unique questions
+        total_questions = len(question_order)
+
+        # Calculate splits
+        pretrain_q_count = int(total_questions * 0.6)
+        rem_count = int(total_questions * 0.4)
+
+        # Get QIds for each split
+        pretrain_qids = question_order[:pretrain_q_count]
+        rem_qids = question_order[pretrain_q_count:]
+
+        # Filter data for each split
+        pretrain_df = df[df['QId'].isin(pretrain_qids)]
+        rem_df = df[df['QId'].isin(rem_qids)]
+
+        user_ids = list(pretrain_df['UserId'])
+        tags = list(pretrain_df['Qtag'])
+
+        pretrain_df = pretrain_df.loc[pretrain_df['Top_user'].isin(user_ids)]
+
+        rem_df = rem_df.loc[rem_df['UserId'].isin(user_ids)]
+        rem_df = rem_df.loc[rem_df['Top_user'].isin(user_ids)]
+        rem_df = rem_df.loc[rem_df['Qtag'].isin(tags)]
+
+        pretrain_df['UserId'] = le.fit_transform(pretrain_df['UserId'])
+        pretrain_df['Top_user'] = le.transform(pretrain_df['Top_user'])
+        pretrain_df['Qtag'] = le1.fit_transform(pretrain_df['Qtag'])
+
+        rem_df['UserId'] = le.transform(rem_df['UserId'])
+        rem_df['Top_user'] = le.transform(rem_df['Top_user'])
+        rem_df['Qtag'] = le1.transform(rem_df['Qtag'])
+
+        rem_df.to_csv(f'{dataset_path}/answers_data.csv',header = False,index=False)
+        
+
+        train_data, tuning_data, test_data = split_user_data(pretrain_df)
 
         train_data = train_data.groupby(['UserId', 'Qtag']).size().reset_index(name='count')
 
@@ -224,17 +260,24 @@ if __name__ == "__main__":
         output_file = f'{dataset_path}/{dataset_name}_test.txt'  
         make_txt_file(test_data,output_file)
 
+        print("===================================PRE TRAIN====================================================")
+        print("No. of. Users",pretrain_df['UserId'].max()+1)
+        print()
+        print("No. of. Tag combinations",pretrain_df['Qtag'].max()+1)
+        print()
+        print("No of Questions : ",pretrain_df['QId'].nunique())
         print("=======================================================================================")
-        print("No. of. Users",df['UserId'].max()+1)
+
+        print("===================================REM====================================================")
+        print("No. of. Users",rem_df['UserId'].max()+1)
         print()
-        print("No. of. Tag combinations",df['Qtag'].max()+1)
+        print("No. of. Tag combinations",rem_df['Qtag'].max()+1)
         print()
-        print("No of Questions : ",df['QId'].nunique())
+        print("No of Questions : ",rem_df['QId'].nunique())
         print("=======================================================================================")
 
         print("Preprocessing completed and all necessary files are created\n")
 
-    except:
+    except Exception as e:
+        print(e)
         print("!!! Error  occured while processing the data unable to proceed !!!\n")
-
-
