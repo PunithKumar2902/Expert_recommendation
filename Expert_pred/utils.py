@@ -94,7 +94,7 @@ def give_data(data_path,min_users=3):
     #Remove
     temp =  data['UserId'].apply(len)
 
-    train, test = train_test_split(data,test_size = 0.2,random_state=32)
+    train, test = train_test_split(data,test_size = 0.25,random_state=32)
 
     print("\n====================================================================================")
     
@@ -146,7 +146,7 @@ def get_embeddings(batch, user_embeddings, question_embeddings):
     
     return user_batch_embeddings, top_user_embeddings, q_tag_embeddings
 
-def performance_metrics(aid_list, score_list, accid, k):
+def performance_metrics(aid_list, score_list, accid, k1,k2):
         """
         Performance metric evaluation
 
@@ -154,7 +154,8 @@ def performance_metrics(aid_list, score_list, accid, k):
             aid_list  -  the list of aid in this batch
             score_list  -  the list of score of ranking
             accid  -  the ground truth
-            k  -  precision at K
+            k1  -  precision at k1
+            k2  -  precision at k2
         """
 
         # if(aid_list.size()[1]==1):
@@ -174,10 +175,9 @@ def performance_metrics(aid_list, score_list, accid, k):
         for ind, (aid, score) in enumerate(id_score_pair):
             if aid == accid:
                 if ind == 0:
-                    return 1/(ind+1), int(ind < k), 1
+                    return 1/(ind+1), int(ind < k1), int(ind<k2), 1
                 else:
-                    return 1/(ind+1), int(ind < k), 0
-
+                    return 1/(ind+1), int(ind < k1), int(ind<k2), 0
 
 def sample_negative_users(all_users, uids, num_negatives=10):
     """

@@ -73,8 +73,7 @@ def train(model, dl, user_embeds, ques_embeds, opt):
 
 def test(model, dl, user_embeds, ques_embeds):
 
-    k=5
-    MRR, hit_K, prec_1 = 0, 0, 0
+    MRR, Hit_5, Hit_3, prec_1 = 0, 0, 0, 0
 
     print("===============================================================")
     print("Test ques: ",len(dl))
@@ -105,34 +104,39 @@ def test(model, dl, user_embeds, ques_embeds):
 
             top_user_ids = batch['Top_userId'].clone().detach()
 
-            R_R, hit, prec = performance_metrics(user_batch_ids,scores,top_user_ids,k) 
+            R_R, hit_5, hit_3, prec = performance_metrics(user_batch_ids,scores,top_user_ids,5,3) 
 
             MRR += R_R
-            hit_K += hit
+            Hit_5 += hit_5
+            Hit_3 +=hit_3
             prec_1 += prec
 
         print("===============================================================")
         print("MRR : ",MRR)
-        print("hit_K : ",hit_K)
+        print("hit_5 : ",Hit_5)
+        print("hit_3 : ",Hit_3)
         print("prec_1 : ",prec_1) 
         print("===============================================================")
 
         print("===============================================================")
         print("MRR : ",MRR/len(dl))
-        print("hit_K : ",hit_K/len(dl))
+        print("hit_5 : ",Hit_5/len(dl))
+        print("hit_3 : ",Hit_3/len(dl))
         print("prec_1 : ",prec_1/len(dl)) 
         print("===============================================================")
 
         with open(f"outputs/{C.DATASET}_output.txt", "a") as file:
             file.write("===============================================================\n")
             file.write(f"MRR : {MRR}\n")
-            file.write(f"hit_K : {hit_K}\n")
+            file.write(f"hit_5 : {Hit_5}\n")
+            file.write(f"hit_3 : {Hit_3}\n")
             file.write(f"prec_1 : {prec_1}\n")
             file.write("===============================================================\n")
 
             file.write("===============================================================\n")
             file.write(f"MRR : {MRR/len(dl)}\n")
-            file.write(f"hit_K : {hit_K/len(dl)}\n")
+            file.write(f"hit_5 : {Hit_5/len(dl)}\n")
+            file.write(f"hit_3 : {Hit_3/len(dl)}\n")
             file.write(f"prec_1 : {prec_1/len(dl)}\n")
             file.write("===============================================================\n")
 

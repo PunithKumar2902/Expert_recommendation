@@ -1,4 +1,4 @@
-DATASET = 'biology'
+DATASET = 'ask_ubuntu'
 
 user_dict = {
     'android':3144,
@@ -24,8 +24,8 @@ tag_dict = {
 
 
 emb_dict = {
-    'ask_ubuntu' :64,
     'android' :16,
+    'ask_ubuntu' :64,
     'biology' :16,
     'codereview':16,
     'electronics':16,

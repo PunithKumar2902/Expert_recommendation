@@ -146,7 +146,7 @@ def main():
     parser = argparse.ArgumentParser()
     opt = parser.parse_args()
     opt.device = torch.device('cuda')
-    set_seed(seed=42)
+    set_seed(42)
     
     # >> optuna setting for tuning hyperparameters
     # opt.n_layers = trial.suggest_int('n_layers', 1,5, )
@@ -165,7 +165,7 @@ def main():
     opt.n_layers = 1
     opt.n_head = 1
     opt.d_model = C.EMB_size #128 #1024 #448
-    opt.epoch = 8
+    opt.epoch = 6
     opt.batch_size = 8
 
     opt.dropout = 0.62
